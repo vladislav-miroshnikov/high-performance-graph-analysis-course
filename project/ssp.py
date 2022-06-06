@@ -27,13 +27,16 @@ def mssp(
     for i, j in enumerate(start_vertices):
         current_front.assign_scalar(0, i, j)
 
-    for _ in range(adjacency_matrix.nrows):
+    changed = True
+    while changed:
+        previous_nnz_front = current_front.nonzero()
         current_front.mxm(
             adjacency_matrix,
             semiring=adjacency_matrix.type.min_plus,
             out=current_front,
             accum=adjacency_matrix.type.min,
         )
+        changed = not previous_nnz_front.iseq(current_front.nonzero())
 
     def __calculate_sp(vertices, distances):
         result = [-1] * adjacency_matrix.nrows
